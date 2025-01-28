@@ -1,33 +1,10 @@
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "io.h"
+
 using namespace std;
-
-string getString(const string& prompt) {
-  string input = "";
-  cout << prompt;
-  getline(cin, input);
-
-  while (input == "") {
-    cout << "No characters entered." << endl;
-    cout << prompt;
-    getline(cin, input);
-  }
-
-  return input;
-}
-
-template <typename T>
-void print(T output, bool carriageReturn = 1) {
-  if (carriageReturn) {
-    cout << output << endl;
-    return;
-  }
-
-  cout << output << flush;
-}
 
 vector<double> constructPolynomial(string input) {
   stringstream ss(input);
@@ -47,17 +24,27 @@ int main() {
   //   denominator = constructPolynomial(denominatorAsString);
   vector<double> numerator = {1, 5, 6};
   vector<double> denominator = {1, 2};
+  vector<double> quotient;
 
-  const double leadingTermD = denominator[0];
-  const double degreeD = denominator.size() - 1;
   const double leadingTermN = numerator[0];
-  const double degreeN = numerator.size() - 1;
+  const size_t degreeN = numerator.size() - 1;
+  const double leadingTermD = denominator[0];
+  const size_t degreeD = denominator.size() - 1;
 
-  print(leadingTermD, 0);
-  print(" ");
-  print(degreeD);
+  quotient.push_back(leadingTermN / leadingTermD);
+  for (size_t i = 0; i < (degreeN - degreeD); i++) {
+    quotient.push_back(0);
+  }
 
-  print(leadingTermN, 0);
-  print(" ");
-  print(degreeN);
+  for (size_t i = 1; i < denominator.size(); i++) {
+    print(denominator[i] * (leadingTermN / leadingTermD));
+  }
+
+  //   print(leadingTermN, 0);
+  //   print(" ");
+  //   print(degreeN);
+
+  //   print(leadingTermD, 0);
+  //   print(" ");
+  //   print(degreeD);
 }
