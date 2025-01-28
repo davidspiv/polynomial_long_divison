@@ -48,7 +48,16 @@ int main() {
   vector<double> numerator = {1, 5, 6};
   vector<double> denominator = {1, 2};
 
-  for (size_t i = 0; i < numerator.size(); i++) {
-    print(numerator[i]);
-  }
+  const double leadingTermD = denominator[0];
+  const double degreeD = denominator.size() - 1;
+  const double leadingTermN = numerator[0];
+  const double degreeN = numerator.size() - 1;
+
+  print(leadingTermD, 0);
+  print(" ");
+  print(degreeD);
+
+  print(leadingTermN, 0);
+  print(" ");
+  print(degreeN);
 }
