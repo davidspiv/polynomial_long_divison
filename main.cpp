@@ -6,7 +6,7 @@
 
 using namespace std;
 
-struct Result {
+struct SubResult {
   vector<int> quotient;
   vector<int> remainder;
 };
@@ -22,10 +22,11 @@ vector<int> constructPolynomial(string input) {
   return polynomial;
 }
 
-Result dividePolynomial(const vector<int> &numerator, vector<int> denominator) {
+SubResult dividePolynomial(const vector<int> &numerator,
+                           const vector<int> &denominator) {
   vector<int> quotient;
   vector<int> product;
-  vector<int> remainder(quotient.size());
+  vector<int> remainder;
 
   const int leadingTermN = numerator[0];
   const size_t degreeN = numerator.size() - 1;
@@ -33,6 +34,10 @@ Result dividePolynomial(const vector<int> &numerator, vector<int> denominator) {
   const size_t degreeD = denominator.size() - 1;
 
   quotient.push_back(leadingTermN / leadingTermD);
+  if (degreeN < degreeD) {
+    return {vector<int>(1, 0), numerator};
+  }
+
   for (size_t i = 0; i < (degreeN - degreeD); i++) {
     quotient.push_back(0);
   }
@@ -52,49 +57,92 @@ Result dividePolynomial(const vector<int> &numerator, vector<int> denominator) {
   return {quotient, remainder};
 }
 
-string getTerm(const vector<int> &polynomial) {
+int getTerm(const vector<int> &polynomial) {
   for (size_t i = 0; i < polynomial.size(); i++) {
-    if (polynomial[i] != 0) {
-      const string coeff = to_string(polynomial[i]);
-      if (polynomial.size() - 1 - i == 0) {
-        return coeff;
-      } else if (polynomial.size() - 1 - i == 1) {
-        return coeff + "x";
-      }
-      const string degree = to_string(polynomial.size() - 1 - i);
-
-      return coeff + "x^" + degree;
+    if (polynomial[i]) {
+      return polynomial[i];
     }
   }
-  return "";
+  print("GET TERM FAILED");
+  return 0;
+}
+
+bool isSamePolynomial(vector<int> polynomialA, vector<int> polynomialB) {
+  if (polynomialA.size() != polynomialB.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < polynomialA.size(); i++) {
+    if (polynomialA[i] != polynomialB[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+bool isValidPolynomial(const vector<int> &polynomial) {
+  if (!polynomial.size()) {
+    return false;
+  }
+  return polynomial.size() > 1 || polynomial[0] != 0;
+}
+
+string polynomialToString(vector<int> polynomial) {
+  string resultString = "";
+  for (size_t i = 0; i < polynomial.size(); i++) {
+    if (i) {
+      if (polynomial[i] < 0) {
+        resultString += " - ";
+      } else {
+        resultString += " + ";
+      }
+    }
+    const int coefficient = abs(polynomial[i]);
+    const int degree = polynomial.size() - i - 1;
+
+    if (!degree || coefficient != 1) {
+      resultString += to_string(coefficient);
+    }
+
+    if (degree > 1) {
+      resultString += "x^" + to_string(degree);
+    } else if (degree == 1) {
+      resultString += "x";
+    }
+  }
+  return resultString;
 }
 
 int main() {
-  //   string numeratorAsString = getString("Enter the numerator: ");
-  //   string denominatorAsString = getString("Enter the denominator: ");
-  //   vector<int> numerator = constructPolynomial(numeratorAsString);
-  //   denominator = constructPolynomial(denominatorAsString);
-  vector<int> numerator = {2, 8, -6, 10};
-  vector<int> denominator = {1, -2};
+  string numeratorAsString = getString("Enter the numerator: ");
+  string denominatorAsString = getString("Enter the denominator: ");
+  vector<int> numerator = constructPolynomial(numeratorAsString);
+  vector<int> denominator = constructPolynomial(denominatorAsString);
+
   vector<int> quotient;
+  SubResult subResult;
 
-  string displayResult = "";
+  do {
+    string newTerm = "";
+    if (isValidPolynomial(subResult.remainder)) {
+      numerator = subResult.remainder;
+    }
+    subResult = dividePolynomial(numerator, denominator);
 
-  Result result = dividePolynomial(numerator, denominator);
+    if (isValidPolynomial(subResult.quotient)) {
+      quotient.push_back(getTerm(subResult.quotient));
+    }
 
-  displayResult += getTerm(result.quotient);
+  } while (!isSamePolynomial(subResult.remainder, numerator) &&
+           isValidPolynomial(subResult.remainder));
 
-  result = dividePolynomial(result.remainder, denominator);
+  string displayString = polynomialToString(quotient);
 
-  displayResult += " + " + getTerm(result.quotient);
-
-  result = dividePolynomial(result.remainder, denominator);
-
-  displayResult += " + " + getTerm(result.quotient);
-
-  for (size_t i = 0; i < result.remainder.size(); i++) {
-    print(result.remainder[i]);
+  if (isValidPolynomial(subResult.remainder)) {
+    const string remainder = " + \\frac{" +
+                             polynomialToString(subResult.remainder) + "}{" +
+                             polynomialToString(denominator) + "}";
+    displayString += remainder;
   }
 
-  print(displayResult);
+  print(displayString);
 }
