@@ -1,3 +1,5 @@
+## Build ##
+Run make (easiest) OR pass main.cpp and io.cpp to the compiler
 ## Purpose ##
 Synthetic division of two polynomials. Calculates the most simplified result including the remainder as a rational expression if needed.
 ## Input ##
