@@ -7,7 +7,7 @@
 using namespace std;
 
 struct SubResult {
-  vector<int> quotient;
+  int quotient;
   vector<int> remainder;
 };
 
@@ -24,7 +24,6 @@ vector<int> constructPolynomial(string input) {
 
 SubResult dividePolynomial(const vector<int> &numerator,
                            const vector<int> &denominator) {
-  vector<int> quotient;
   vector<int> product;
   vector<int> remainder;
 
@@ -34,10 +33,10 @@ SubResult dividePolynomial(const vector<int> &numerator,
   const size_t degreeD = denominator.size() - 1;
 
   if (degreeN < degreeD) {
-    return {vector<int>(1, 0), numerator};
+    return {0, numerator};
   }
 
-  quotient.push_back(leadingTermN / leadingTermD);
+  const int quotient = leadingTermN / leadingTermD;
 
   for (size_t i = 0; i < denominator.size(); i++) {
     product.push_back(denominator[i] * (leadingTermN / leadingTermD));
@@ -48,15 +47,6 @@ SubResult dividePolynomial(const vector<int> &numerator,
   }
 
   return {quotient, remainder};
-}
-
-int getTerm(const vector<int> &polynomial) {
-  for (size_t i = 0; i < polynomial.size(); i++) {
-    if (polynomial[i]) {
-      return polynomial[i];
-    }
-  }
-  return 0;
 }
 
 bool isSamePolynomial(vector<int> polynomialA, vector<int> polynomialB) {
@@ -148,8 +138,8 @@ int main() {
 
     subResult = dividePolynomial(numerator, denominator);
 
-    if (!isNullPolynomial(subResult.quotient)) {
-      quotient.push_back(getTerm(subResult.quotient));
+    if (subResult.quotient) {
+      quotient.push_back(subResult.quotient);
     }
 
   } while (!isSamePolynomial(subResult.remainder, numerator) &&
