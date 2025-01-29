@@ -143,8 +143,8 @@ string buildResult(const vector<int> &quotient, const vector<int> &remainder,
 }
 
 int main() {
-  const vector<int> denominator = getPoly("Enter the denominator: ");
   vector<int> numerator = getPoly("Enter the numerator: ");
+  const vector<int> denominator = getPoly("Enter the denominator: ");
   vector<int> quotient;
   SubResult subResult;
 
