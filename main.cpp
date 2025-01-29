@@ -11,35 +11,67 @@ struct SubResult {
   vector<int> remainder;
 };
 
-vector<int> constructPolynomial(string input) {
-  stringstream ss(input);
-  vector<int> polynomial;
-  string coefficient;
-  while (getline(ss, coefficient, ' ')) {
-    // TODO: error handling for stod
-    polynomial.push_back(stod(coefficient));
+bool validCharacters(string input) {
+  for (size_t i = 0; i < input.length(); i++) {
+    if (input[i] != ' ' && input[i] != '-' && !isdigit(input[i])) {
+      print("ERROR: non-integer detected");
+      return false;
+    }
   }
-  return polynomial;
+  return true;
 }
 
-SubResult dividePolynomial(const vector<int> &numerator,
-                           const vector<int> &denominator) {
+bool isNullString(string input) {
+  for (size_t i = 0; i < input.length(); i++) {
+    if (input[i] != ' ' && input[i] != '0') {
+      return false;
+    }
+  }
+  print("ERROR: polynomial is null");
+  return true;
+}
+
+vector<int> getPoly(const string &message) {
+  string polyAsString = getString(message);
+  stringstream polyAsStream;
+  string coefficient;
+  vector<int> poly;
+
+  while (!validCharacters(polyAsString) || isNullString(polyAsString)) {
+    polyAsString = getString(message);
+  };
+
+  polyAsStream.str(polyAsString);
+
+  while (getline(polyAsStream, coefficient, ' ')) {
+    poly.push_back(stod(coefficient));
+  }
+
+  return poly;
+}
+
+bool isNullPoly(const vector<int> &poly) {
+  if (!poly.size()) {
+    return true;
+  }
+  return poly.size() <= 1 && !poly[0];
+}
+
+SubResult dividePoly(const vector<int> &numerator,
+                     const vector<int> &denominator) {
+  const int leadingTermNumerator = numerator[0];
+  const int leadingTermDenominator = denominator[0];
+  const int quotient = leadingTermNumerator / leadingTermDenominator;
+
   vector<int> product;
   vector<int> remainder;
 
-  const int leadingTermN = numerator[0];
-  const size_t degreeN = numerator.size() - 1;
-  const int leadingTermD = denominator[0];
-  const size_t degreeD = denominator.size() - 1;
-
-  if (degreeN < degreeD) {
+  if (numerator.size() < denominator.size()) {
     return {0, numerator};
   }
 
-  const int quotient = leadingTermN / leadingTermD;
-
   for (size_t i = 0; i < denominator.size(); i++) {
-    product.push_back(denominator[i] * (leadingTermN / leadingTermD));
+    product.push_back(denominator[i] * quotient);
   }
 
   for (size_t i = 1; i < numerator.size(); i++) {
@@ -49,45 +81,38 @@ SubResult dividePolynomial(const vector<int> &numerator,
   return {quotient, remainder};
 }
 
-bool isSamePolynomial(vector<int> polynomialA, vector<int> polynomialB) {
-  if (polynomialA.size() != polynomialB.size()) {
+bool equivalentPolys(const vector<int> &polyA, const vector<int> &polyB) {
+  if (polyA.size() != polyB.size()) {
     return false;
   }
-  for (size_t i = 0; i < polynomialA.size(); i++) {
-    if (polynomialA[i] != polynomialB[i]) {
+  for (size_t i = 0; i < polyA.size(); i++) {
+    if (polyA[i] != polyB[i]) {
       return false;
     }
   }
   return true;
 };
 
-bool isNullPolynomial(const vector<int> &polynomial) {
-  if (!polynomial.size()) {
-    return true;
-  }
-  return polynomial.size() <= 1 && !polynomial[0];
-}
-
-string polynomialToString(vector<int> polynomial) {
+string polyToString(const vector<int> &poly) {
   string resultString = "";
   int coefficient;
-  for (size_t i = 0; i < polynomial.size(); i++) {
-    if (!polynomial[i]) {
+  for (size_t i = 0; i < poly.size(); i++) {
+    if (!poly[i]) {
       continue;
     }
 
     if (resultString.length()) {
-      if (polynomial[i] < 0) {
+      if (poly[i] < 0) {
         resultString += " - ";
       } else {
         resultString += " + ";
       }
-      coefficient = abs(polynomial[i]);
+      coefficient = abs(poly[i]);
     } else {
-      coefficient = polynomial[i];
+      coefficient = poly[i];
     }
 
-    const int degree = polynomial.size() - i - 1;
+    const int degree = poly.size() - i - 1;
 
     if (!degree || coefficient != 1) {
       resultString += to_string(coefficient);
@@ -102,48 +127,40 @@ string polynomialToString(vector<int> polynomial) {
   return resultString;
 }
 
-void printResult(const vector<int> &quotient, const vector<int> &remainder,
-                 const vector<int> &denominator) {
-  string displayString = polynomialToString(quotient);
+string buildResult(const vector<int> &quotient, const vector<int> &remainder,
+                   const vector<int> &denominator) {
+  string displayString = polyToString(quotient);
 
-  if (!isNullPolynomial(remainder)) {
-    const string remainderAsString = "\\frac{" + polynomialToString(remainder) +
-                                     "}{" + polynomialToString(denominator) +
-                                     "}";
+  if (!isNullPoly(remainder)) {
+    const string remainderAsString = "\\frac{" + polyToString(remainder) +
+                                     "}{" + polyToString(denominator) + "}";
     if (displayString.length()) {
       displayString += " + ";
     }
     displayString += remainderAsString;
   }
-
-  print(displayString);
+  return displayString;
 }
 
 int main() {
-  //   const string numeratorAsString = getString("Enter the numerator: ");
-  //   const string denominatorAsString = getString("Enter the denominator: ");
-  //   const vector<int> denominator = constructPolynomial(denominatorAsString);
-  //   vector<int> numerator = constructPolynomial(numeratorAsString);
-
-  const vector<int> denominator = {1, -7};
-  vector<int> numerator = {1, 2, -3, 4};
-
+  const vector<int> denominator = getPoly("Enter the denominator: ");
+  vector<int> numerator = getPoly("Enter the numerator: ");
   vector<int> quotient;
   SubResult subResult;
 
   do {
-    if (!isNullPolynomial(subResult.remainder)) {
+    if (!isNullPoly(subResult.remainder)) {
       numerator = subResult.remainder;
     }
 
-    subResult = dividePolynomial(numerator, denominator);
+    subResult = dividePoly(numerator, denominator);
 
     if (subResult.quotient) {
       quotient.push_back(subResult.quotient);
     }
 
-  } while (!isSamePolynomial(subResult.remainder, numerator) &&
-           !isNullPolynomial(subResult.remainder));
+  } while (!equivalentPolys(subResult.remainder, numerator) &&
+           !isNullPoly(subResult.remainder));
 
-  printResult(quotient, subResult.remainder, denominator);
+  print("\nResult: " + buildResult(quotient, subResult.remainder, denominator));
 }

@@ -6,7 +6,7 @@ std::string getString(const std::string& prompt) {
   std::getline(std::cin, input);
 
   while (input == "") {
-    std::cout << "No characters entered." << std::endl;
+    std::cout << "ERROR: no characters entered" << std::endl;
     std::cout << prompt;
     std::getline(std::cin, input);
   }
